@@ -43,8 +43,9 @@ class Network(object):
         for b, w in zip(self.biases, self.weights):
             a = sigmoid(np.dot(w, a)+b)
         return a
-
-    def SGD(self, training_data, epochs, mini_batch_size, eta,
+    #Aquí tuve que agregar el valor de nu como parámetro de la función SGD para que 
+    #pudiera llamar apropiadamente a la función self.update_mini_batch_modified(mini_batch, eta, nu).
+    def SGD(self, training_data, epochs, mini_batch_size, eta, nu,
             test_data=None):
         """Train the neural network using mini-batch stochastic
         gradient descent.  The ``training_data`` is a list of tuples
@@ -68,27 +69,39 @@ class Network(object):
                 training_data[k:k+mini_batch_size]
                 for k in range(0, n, mini_batch_size)]
             for mini_batch in mini_batches:
-                self.update_mini_batch(mini_batch, eta)
+                self.update_mini_batch_modified(mini_batch, eta, nu)
             if test_data:
                 print("Epoch {} : {} / {}".format(j,self.evaluate(test_data),n_test))
             else:
                 print("Epoch {} complete".format(j))
-
-    def update_mini_batch(self, mini_batch, eta):
+    #Como último parámetro introduje a la nu y cambié el nombre de la función para que se vea el cambio.
+    def update_mini_batch_modified(self, mini_batch, eta, nu):
         """Update the network's weights and biases by applying
         gradient descent using backpropagation to a single mini batch.
         The ``mini_batch`` is a list of tuples ``(x, y)``, and ``eta``
         is the learning rate."""
         nabla_b = [np.zeros(b.shape) for b in self.biases]
         nabla_w = [np.zeros(w.shape) for w in self.weights]
+        #Aquí definí los vectores de las velocidades. Deben tener la misma dimensión que nabla_b o nabla_w, según corresponda.
+        velocidad_b=[np.random.randn(*b.shape,) for b in self.biases]
+        velocidad_w=[np.random.randn(*w.shape,) for w in self.weights]
         for x, y in mini_batch:
             delta_nabla_b, delta_nabla_w = self.backprop(x, y)
             nabla_b = [nb+dnb for nb, dnb in zip(nabla_b, delta_nabla_b)]
+            #Introduciré la actualización de las velocidades para b
+            #Lo haré de la misma manera en cómo se actualiza nabla_b
+            #O en cómo se actualiza nabla_w
+            velocidad_b=[nu*vb-eta*nb for vb, nb in zip(velocidad_b, delta_nabla_b)]
             nabla_w = [nw+dnw for nw, dnw in zip(nabla_w, delta_nabla_w)]
-        self.weights = [w-(eta/len(mini_batch))*nw
-                        for w, nw in zip(self.weights, nabla_w)]
-        self.biases = [b-(eta/len(mini_batch))*nb
-                       for b, nb in zip(self.biases, nabla_b)]
+            #Introduciré la actualización de las velocidades para w
+            velocidad_w=[nu*vw-eta*nw for vw, nw in zip(velocidad_w, delta_nabla_w)]
+        #Aquí ya introduciré el optimizador, que es una modificación en cómo se actualizan los pesos y los biases.
+        """El libro no menciona que el término de la eta deba estar dividido por el tamaño del
+        minibatch, creo que eso lo dejaré así como está en el código."""
+        self.weights = [w+nu*vw-(eta/len(mini_batch))*nw
+                        for w, nw, vw in zip(self.weights, nabla_w, velocidad_w)]
+        self.biases = [b+nu*vb-(eta/len(mini_batch))*nb
+                       for b, nb, vb in zip(self.biases, nabla_b, velocidad_b)]
 
     def backprop(self, x, y):
         """Return a tuple ``(nabla_b, nabla_w)`` representing the
