@@ -91,10 +91,10 @@ class Network(object):
             #Introduciré la actualización de las velocidades para b
             #Lo haré de la misma manera en cómo se actualiza nabla_b
             #O en cómo se actualiza nabla_w
-            velocidad_b=[nu*vb-eta*nb for vb, nb in zip(velocidad_b, delta_nabla_b)]
+            velocidad_b=[nu*vb-eta*nb for vb, nb in zip(velocidad_b, nabla_b)]
             nabla_w = [nw+dnw for nw, dnw in zip(nabla_w, delta_nabla_w)]
             #Introduciré la actualización de las velocidades para w
-            velocidad_w=[nu*vw-eta*nw for vw, nw in zip(velocidad_w, delta_nabla_w)]
+            velocidad_w=[nu*vw-eta*nw for vw, nw in zip(velocidad_w, nabla_w)]
         #Aquí ya introduciré el optimizador, que es una modificación en cómo se actualizan los pesos y los biases.
         """El libro no menciona que el término de la eta deba estar dividido por el tamaño del
         minibatch, creo que eso lo dejaré así como está en el código."""
