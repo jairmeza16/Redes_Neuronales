@@ -3,9 +3,10 @@ import network
 import pickle
 training_data, validation_data , test_data = mnist_loader.load_data_wrapper()
 training_data = list(training_data)
+print(len(training_data))
 test_data = list(test_data)
 net=network.Network([784,30,10])
-net.SGD( training_data, 30, 10, 3.0, 0.25, test_data=test_data)
+net.SGD( training_data, 30, 10, 3.0, 0.05, test_data=test_data)
 archivo = open("red_prueba1.pkl",'wb')
 pickle.dump(net,archivo)
 archivo.close()

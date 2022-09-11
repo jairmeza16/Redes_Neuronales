@@ -102,7 +102,6 @@ class Network(object):
                         for w, nw, vw in zip(self.weights, nabla_w, velocidad_w)]
         self.biases = [b+nu*vb-(eta/len(mini_batch))*nb
                        for b, nb, vb in zip(self.biases, nabla_b, velocidad_b)]
-
     def backprop(self, x, y):
         """Return a tuple ``(nabla_b, nabla_w)`` representing the
         gradient for the cost function C_x.  ``nabla_b`` and
@@ -120,10 +119,15 @@ class Network(object):
             activation = sigmoid(z)
             activations.append(activation)
         # backward pass
-        delta = self.cost_derivative(activations[-1], y) * \
-            sigmoid_prime(zs[-1])
-        nabla_b[-1] = delta
-        nabla_w[-1] = np.dot(delta, activations[-2].transpose())
+        """Para implementar la función de costo Cross Entropy, es necesario cambiar cómo se calcula la delta. Esta función
+        de costo fue pensada para que la delta fuera más fácil de calcular. Debe quedar de la siguiente manera."""
+        delta = self.cost_derivative(activations[-1], y)
+        ############################################################ Falta cambiar la nabla_b y la nabla_w ####################################
+        ###################################################### Me cuesta un poco porque ahora ambas son sumas... ##############################
+        #Cambiando las nablas... #Puse 1/1000 porque debía yo poner 1/n, con n el número de dígitos analizados por cada época. En este caso
+        #son 10000.
+        nabla_b[-1] = (1/1000)*np.sum(delta)
+        nabla_w[-1] = (1/1000)*np.sum(np.dot(delta, activations[-2].transpose()))
         # Note that the variable l in the loop below is used a little
         # differently to the notation in Chapter 2 of the book.  Here,
         # l = 1 means the last layer of neurons, l = 2 is the
@@ -133,6 +137,7 @@ class Network(object):
         for l in range(2, self.num_layers):
             z = zs[-l]
             sp = sigmoid_prime(z)
+            ########################################## Me imagino que para que funcione también debo cambiar esta delta ######################
             delta = np.dot(self.weights[-l+1].transpose(), delta) * sp
             nabla_b[-l] = delta
             nabla_w[-l] = np.dot(delta, activations[-l-1].transpose())
