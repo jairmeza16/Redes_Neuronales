@@ -126,8 +126,12 @@ class Network(object):
         ###################################################### Me cuesta un poco porque ahora ambas son sumas... ##############################
         #Cambiando las nablas... #Puse 1/1000 porque debía yo poner 1/n, con n el número de dígitos analizados por cada época. En este caso
         #son 10000.
-        nabla_b[-1] = (1/1000)*np.sum(delta)
-        nabla_w[-1] = (1/1000)*np.sum(np.dot(delta, activations[-2].transpose()))
+        
+        #Ahora volveré a la forma original para cambiar las nabla_b y las nabla_w.  
+        #nabla_b[-1] = (1/1000)*np.sum(delta)
+        #nabla_w[-1] = (1/1000)*np.sum(np.dot(delta, activations[-2].transpose()))
+        nabla_b[-1] = delta
+        nabla_w[-1] = np.dot(delta, activations[-2].transpose())
         # Note that the variable l in the loop below is used a little
         # differently to the notation in Chapter 2 of the book.  Here,
         # l = 1 means the last layer of neurons, l = 2 is the
